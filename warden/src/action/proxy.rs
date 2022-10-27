@@ -27,7 +27,7 @@ impl Proxy {
 
         let query = match &self.query {
             Some(q) => Some(q.apply(req.uri().query())),
-            None => req.uri().query().map(String::from)
+            None => req.uri().query().map(String::from),
         };
 
         let path_and_query = match query {
@@ -94,11 +94,9 @@ impl QueryUpdate {
                     .collect();
 
                 querystring::stringify(px)
-            },
+            }
             Self::Merge(params) => {
-                let mut updated = existing
-                    .map(querystring::querify)
-                    .unwrap_or(Vec::new());
+                let mut updated = existing.map(querystring::querify).unwrap_or(Vec::new());
 
                 for (k, v) in params {
                     let member = updated.iter().find(|(ke, _)| ke == k).is_some();
@@ -129,7 +127,7 @@ impl Builder {
             host: None,
             port: None,
             path: None,
-            query: None
+            query: None,
         }
     }
 
@@ -172,15 +170,13 @@ impl Builder {
         let scheme = self.scheme?;
         let host = self.host?;
 
-        Some(
-            Proxy {
-                scheme,
-                host,
-                port: self.port,
-                path: self.path,
-                query: self.query
-            }
-        )
+        Some(Proxy {
+            scheme,
+            host,
+            port: self.port,
+            path: self.path,
+            query: self.query,
+        })
     }
 }
 
@@ -191,10 +187,7 @@ mod tests {
     use std::str::FromStr;
 
     fn mk_req(uri: &str) -> Request<()> {
-        http::Request::builder()
-            .uri(uri)
-            .body(())
-            .unwrap()
+        http::Request::builder().uri(uri).body(()).unwrap()
     }
 
     #[test]
