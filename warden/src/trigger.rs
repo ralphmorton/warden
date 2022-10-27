@@ -1,32 +1,28 @@
-pub mod request;
-pub mod response;
+pub mod method;
+pub mod path;
 
-use crate::trigger::request::RequestTrigger;
-use crate::trigger::response::ResponseTrigger;
-use http::{Request, Response};
+use crate::trigger::method::MethodTrigger;
+use crate::trigger::path::PathTrigger;
+use http::Request;
 
 pub struct Trigger {
-    request: RequestTrigger,
-    response: Option<ResponseTrigger>,
+    path: PathTrigger,
+    method: MethodTrigger,
 }
 
 impl Trigger {
-    pub fn new(request: RequestTrigger, response: Option<ResponseTrigger>) -> Self {
-        Self { request, response }
+    pub fn new(path: PathTrigger, method: MethodTrigger) -> Self {
+        Self { path, method }
     }
 
-    pub fn applies_to_req<T>(&self, req: &Request<T>) -> bool {
-        if self.response.is_some() {
-            return false;
+    pub fn catch_all() -> Self {
+        Self {
+            path: PathTrigger::Any,
+            method: MethodTrigger::Any,
         }
-
-        self.request.applies(req)
     }
 
-    pub fn applies_to_rsp<T, U>(&self, req: &Request<T>, rsp: &Response<U>) -> bool {
-        match &self.response {
-            None => false,
-            Some(r) => r.applies(rsp) && self.request.applies(req),
-        }
+    pub fn applies<T>(&self, req: &Request<T>) -> bool {
+        self.path.applies(req) && self.method.applies(req)
     }
 }
